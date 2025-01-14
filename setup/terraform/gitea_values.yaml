@@ -6,6 +6,10 @@ postgresql:
   enabled: true
 postgresql-ha:
   enabled: false
+actions:
+  enabled: true
+  provisioning:
+    enabled: true
 
 persistence:
   enabled: true
