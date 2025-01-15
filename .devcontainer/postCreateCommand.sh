@@ -1,6 +1,13 @@
 #!/usr/bin/env bash
 sudo apt-get install -y curl unzip wget net-tools jq
 
+# 6. Make certificates happen :)
+curl -JLO "https://dl.filippo.io/mkcert/latest?for=linux/amd64"
+chmod +x mkcert-v*-linux-amd64
+sudo mv mkcert-v*-linux-amd64 /usr/local/bin/mkcert
+export CAROOT=$(pwd)
+mkcert -install
+
 # Check if dockerd is running
 if ! pgrep -x "dockerd" > /dev/null
 then
@@ -123,13 +130,6 @@ data:
   host: "localhost:${reg_port}"
   help: "https://kind.sigs.k8s.io/docs/user/local-registry/"
 EOF
-
-# 6. Make certificates happen :)
-curl -JLO "https://dl.filippo.io/mkcert/latest?for=linux/amd64"
-chmod +x mkcert-v*-linux-amd64
-sudo mv mkcert-v*-linux-amd64 /usr/local/bin/mkcert
-export CAROOT=$(pwd)
-mkcert -install
 
 echo ""
 echo ">>>> Everything prepared, ready to deploy application."
