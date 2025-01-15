@@ -84,7 +84,9 @@ fi
 
 # used by humanitec-agent / inside docker to reach the cluster
 kubeconfig_docker=$BASE_DIR/state/kube/config-internal.yaml
-kind export kubeconfig -n 5min-idp --kubeconfig "$kubeconfig_docker"
+kind export kubeconfig --internal -n 5min-idp --kubeconfig "$kubeconfig_docker"
+# used in general
+kind export kubeconfig --internal -n 5min-idp
 
 # 3. Add the registry config to the nodes
 #
