@@ -27,21 +27,23 @@ while [[ -z $RUNNER_TOKEN ]]; do
 done
 
 # Start Gitea Runner
-# docker volume create gitea_runner_data
-# docker create \
-#   --name gitea_runner \
-#   -v gitea_runner_data:/data \
-#   -v /var/run/docker.sock:/var/run/docker.sock \
-#   -e CONFIG_FILE=/config.yaml \
-#   -e GITEA_INSTANCE_URL=https://5min-idp-control-plane \
-#   -e GITEA_RUNNER_REGISTRATION_TOKEN=$RUNNER_TOKEN \
-#   -e GITEA_RUNNER_NAME=local \
-#   -e GITEA_RUNNER_LABELS=local \
-#   --network kind \
-#   gitea/act_runner:latest
-# sed 's|###ca-certficates.crt###|'"$TLS_CA_CERT"'|' setup/gitea/config.yaml > setup/gitea/config.done.yaml
-# docker cp setup/gitea/config.done.yaml gitea_runner:/config.yaml
-# docker start gitea_runner
+docker volume create gitea_runner_data
+docker create \
+  --name gitea_runner \
+  -v gitea_runner_data:/data \
+  -v /var/run/docker.sock:/var/run/docker.sock \
+  -v /etc/ssl/certs:/etc/ssl/certs:ro \
+  -v /etc/ca-certificates:/etc/ca-certificates:ro \
+  -e CONFIG_FILE=/config.yaml \
+  -e GITEA_INSTANCE_URL=https://5min-idp-control-plane \
+  -e GITEA_RUNNER_REGISTRATION_TOKEN=$RUNNER_TOKEN \
+  -e GITEA_RUNNER_NAME=local \
+  -e GITEA_RUNNER_LABELS=local \
+  --network kind \
+  gitea/act_runner:latest
+sed 's|###ca-certficates.crt###|'"$TLS_CA_CERT"'|' setup/gitea/config.yaml > setup/gitea/config.done.yaml
+docker cp setup/gitea/config.done.yaml gitea_runner:/config.yaml
+docker start gitea_runner
 
 # Create Gitea org and Backstage clone with configuration
 curl -k -X 'POST' \

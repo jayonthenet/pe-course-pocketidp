@@ -84,7 +84,7 @@ fi
 
 # used by humanitec-agent / inside docker to reach the cluster
 kubeconfig_docker=$BASE_DIR/state/kube/config-internal.yaml
-kind export kubeconfig --internal  -n 5min-idp --kubeconfig "$kubeconfig_docker"
+kind export kubeconfig -n 5min-idp --kubeconfig "$kubeconfig_docker"
 
 # 3. Add the registry config to the nodes
 #
@@ -121,6 +121,13 @@ data:
   host: "localhost:${reg_port}"
   help: "https://kind.sigs.k8s.io/docs/user/local-registry/"
 EOF
+
+# 6. Make certificates happen :)
+curl -JLO "https://dl.filippo.io/mkcert/latest?for=linux/amd64"
+chmod +x mkcert-v*-linux-amd64
+sudo mv mkcert-v*-linux-amd64 /usr/local/bin/mkcert
+export CAROOT=$(pwd)
+mkcert -install
 
 echo ""
 echo ">>>> Everything prepared, ready to deploy application."
