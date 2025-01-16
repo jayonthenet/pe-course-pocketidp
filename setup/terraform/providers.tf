@@ -31,6 +31,7 @@ terraform {
 
 provider "humanitec" {
   org_id = var.humanitec_org
+  token = var.humanitec_token
 }
 
 provider "kubernetes" {

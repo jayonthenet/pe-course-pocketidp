@@ -7,7 +7,7 @@ else
   export TF_VAR_humanitec_token=$(yq -r '.token' ~/.humctl)
 fi
 # Variables for TLS in Terraform
-export TF_VAR_tls_ca_cert=$TLS_CA_CERT
+# export TF_VAR_tls_ca_cert=$TLS_CA_CERT
 export TF_VAR_tls_cert_string=$TLS_CERT_STRING
 export TF_VAR_tls_key_string=$TLS_KEY_STRING
 
