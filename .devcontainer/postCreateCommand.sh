@@ -5,7 +5,7 @@ sudo apt-get install -y curl unzip wget net-tools jq
 curl -JLO "https://dl.filippo.io/mkcert/latest?for=linux/amd64"
 chmod +x mkcert-v*-linux-amd64
 sudo mv mkcert-v*-linux-amd64 /usr/local/bin/mkcert
-export CAROOT=$(pwd)
+export CAROOT="/workspaces"
 mkcert -install
 
 # Check if dockerd is running
