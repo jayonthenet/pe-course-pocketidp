@@ -16,12 +16,6 @@ variable "kubeconfig" {
   default     = "/home/vscode/state/kube/config-internal.yaml"
 }
 
-# variable "tls_ca_cert" {
-#   description = "Path to CA certificate that needs to be trusted"
-#   type        = string
-#   default     = ""
-# }
-
 variable "tls_cert_string" {
   description = "Cert as string for TLS setup"
   type        = string

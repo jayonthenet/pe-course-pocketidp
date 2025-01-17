@@ -1,6 +1,6 @@
 terraform {
   backend "local" {
-    path = "/home/vscode/state/terraform/terraform.tfstate"
+    path = "/workspaces/state/terraform/terraform.tfstate"
   }
 
   required_providers {
