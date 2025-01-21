@@ -1,13 +1,23 @@
 #!/usr/bin/env bash
-sudo apt-get install -y curl unzip wget net-tools jq
 
-# 6. Make certificates happen :)
+# Define a sudo wrapper
+run_as_root() {
+  if [ "$(id -u)" -ne 0 ]; then
+    sudo "$@"
+  else
+    "$@"
+  fi
+}
+
+run_as_root apt-get install -y curl unzip wget net-tools jq
+
+# Make certificates happen :)
 if ! command -v mkcert &> /dev/null
 then
   echo "mkcert not found. Installing..."
   curl -JLO "https://dl.filippo.io/mkcert/latest?for=linux/amd64"
   chmod +x mkcert-v*-linux-amd64
-  sudo mv mkcert-v*-linux-amd64 /usr/local/bin/mkcert
+  run_as_root mv mkcert-v*-linux-amd64 /usr/local/bin/mkcert
 else
   echo "mkcert is already installed."
 fi
@@ -18,7 +28,7 @@ mkcert -install
 if ! pgrep -x "dockerd" > /dev/null
 then
   echo "Docker daemon is not running. Starting dockerd in the background..."
-  sudo dockerd > /dev/null 2>&1 &
+  run_as_root dockerd > /dev/null 2>&1 &
 else
   echo "Docker daemon is already running."
 fi
@@ -40,7 +50,7 @@ then
   VERSION="1.5.7"
   wget "https://releases.hashicorp.com/terraform/${VERSION}/terraform_${VERSION}_linux_${ARCH}.zip"
   unzip terraform_${VERSION}_linux_${ARCH}.zip
-  sudo mv terraform /usr/local/bin/
+  run_as_root mv terraform /usr/local/bin/
   rm terraform_${VERSION}_linux_${ARCH}.zip
 else
   echo "Terraform is already installed."
@@ -52,7 +62,7 @@ then
   echo "yq not found. Installing..."
   VERSION="v4.35.1" # Replace with the desired version
   wget "https://github.com/mikefarah/yq/releases/download/${VERSION}/yq_linux_${ARCH}"
-  sudo mv yq_linux_${ARCH} /usr/local/bin/yq
+  run_as_root mv yq_linux_${ARCH} /usr/local/bin/yq
 else
   echo "yq is already installed."
 fi
@@ -101,7 +111,7 @@ else
 fi
 
 # setup autocomplete for kubectl
-sudo apt-get update -y && sudo apt-get install bash-completion -y
+run_as_root apt-get update -y && run_as_root apt-get install bash-completion -y
 mkdir $HOME/.kube
 echo "source <(kubectl completion bash)" >> $HOME/.bashrc
 echo "complete -F __start_kubectl k" >> $HOME/.bashrc
@@ -135,7 +145,7 @@ if [ "$(docker inspect -f='{{json .NetworkSettings.Networks.kind}}' "${container
 fi
 
 # used by humanitec-agent / inside docker to reach the cluster
-kubeconfig_docker=$BASE_DIR/state/kube/config-internal.yaml
+export kubeconfig_docker=$BASE_DIR/state/kube/config-internal.yaml
 kind export kubeconfig --internal -n 5min-idp --kubeconfig "$kubeconfig_docker"
 # used in general
 kind export kubeconfig --internal -n 5min-idp
@@ -178,7 +188,7 @@ EOF
 
 ## Update /etc/hosts with the kind cluster name
 if ! grep -q "5min-idp-control-plane" /etc/hosts; then
-  echo "127.0.0.1 5min-idp-control-plane" | sudo tee -a /etc/hosts
+  echo "127.0.0.1 5min-idp-control-plane" | run_as_root tee -a /etc/hosts
 fi
 
 ## Prep env
@@ -196,7 +206,7 @@ export TF_VAR_humanitec_token=$HUMANITEC_SERVICE_USER
 export TF_VAR_tls_cert_string=$PIDP_CERT
 export TF_VAR_tls_key_string=$PIDP_KEY
 # Kubeconfig for Terraform
-#export TF_VAR_kubeconfig=$kubeconfig_docker
+export TF_VAR_kubeconfig=$kubeconfig_docker
 
 terraform -chdir=setup/terraform init
 terraform -chdir=setup/terraform apply -auto-approve
