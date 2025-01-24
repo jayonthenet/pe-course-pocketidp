@@ -82,6 +82,33 @@ else
   echo "score-k8s is already installed."
 fi
 
+# For humctl AMD64 / x86_64
+if ! command -v humctl &> /dev/null
+then
+  echo "humctl not found. Installing..."
+  [ $(uname -m) = x86_64 ] && curl -sLO "https://github.com/humanitec/cli/releases/download/v0.36.2/cli_0.36.2_linux_amd64.tar.gz"
+  # For humctl ARM64
+  [ $(uname -m) = aarch64 ] && curl -sLO "https://github.com/humanitec/cli/releases/download/v0.36.2/cli_0.36.2_linux_arm64.tar.gz"
+  tar xvzf cli_0.36.2_linux_*.tar.gz
+  rm cli_0.36.2_linux_*.tar.gz README.md LICENSE
+  run_as_root mv ./humctl /usr/local/bin/humctl
+  run_as_root chown root: /usr/local/bin/humctl
+else
+  echo "humctl is already installed."
+fi
+
+# Install glow to be able to read MD files in the terminal
+if ! command -v glow &> /dev/null
+then
+  echo "glow not found. Installing..."
+  run_as_root mkdir -p /etc/apt/keyrings
+  curl -fsSL https://repo.charm.sh/apt/gpg.key | run_as_root gpg --dearmor -o /etc/apt/keyrings/charm.gpg
+  echo "deb [signed-by=/etc/apt/keyrings/charm.gpg] https://repo.charm.sh/apt/ * *" | run_as_root tee /etc/apt/sources.list.d/charm.list
+  run_as_root apt update && run_as_root apt install glow -y
+else
+  echo "glow is already installed."
+fi
+
 # Check if kubectl is installed
 if ! command -v kubectl &> /dev/null
 then
